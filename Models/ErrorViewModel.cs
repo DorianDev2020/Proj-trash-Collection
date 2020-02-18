@@ -1,6 +1,6 @@
 using System;
 
-namespace TrashCollector.Models
+namespace ProjTrashCollection.Models
 {
     public class ErrorViewModel
     {

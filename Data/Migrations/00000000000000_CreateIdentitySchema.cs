@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace TrashCollector.Data.Migrations
+namespace ProjTrashCollection.Data.Migrations
 {
     public partial class CreateIdentitySchema : Migration
     {
