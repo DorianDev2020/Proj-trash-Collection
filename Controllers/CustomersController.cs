@@ -10,23 +10,23 @@ using ProjTrashCollection.Models;
 
 namespace ProjTrashCollection.Controllers
 {
-    public class EmployeesController : Controller
+    public class CustomersController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public EmployeesController(ApplicationDbContext context)
+        public CustomersController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: Employees
+        // GET: Customers
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Employees.Include(e => e.UserIdentity);
+            var applicationDbContext = _context.Customers.Include(c => c.UserIdentity);
             return View(await applicationDbContext.ToListAsync());
         }
 
-        // GET: Employees/Details/5
+        // GET: Customers/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -34,42 +34,42 @@ namespace ProjTrashCollection.Controllers
                 return NotFound();
             }
 
-            var employee = await _context.Employees
-                .Include(e => e.UserIdentity)
-                .FirstOrDefaultAsync(m => m.EmployeeID == id);
-            if (employee == null)
+            var customer = await _context.Customers
+                .Include(c => c.UserIdentity)
+                .FirstOrDefaultAsync(m => m.CustID == id);
+            if (customer == null)
             {
                 return NotFound();
             }
 
-            return View(employee);
+            return View(customer);
         }
 
-        // GET: Employees/Create
+        // GET: Customers/Create
         public IActionResult Create()
         {
             ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id");
             return View();
         }
 
-        // POST: Employees/Create
+        // POST: Customers/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("EmployeeID,Name,Zipcode,IdentityUserId")] Employee employee)
+        public async Task<IActionResult> Create([Bind("CustID,Zipcode,Balance,Phonenumber,Startdate,Enddate,Streetaddress,Name,Streetname,Cityname,Statename,Pickupday,IdentityUserId")] Customer customer)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(employee);
+                _context.Add(customer);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id", employee.IdentityUserId);
-            return View(employee);
+            ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id", customer.IdentityUserId);
+            return View(customer);
         }
 
-        // GET: Employees/Edit/5
+        // GET: Customers/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -77,23 +77,23 @@ namespace ProjTrashCollection.Controllers
                 return NotFound();
             }
 
-            var employee = await _context.Employees.FindAsync(id);
-            if (employee == null)
+            var customer = await _context.Customers.FindAsync(id);
+            if (customer == null)
             {
                 return NotFound();
             }
-            ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id", employee.IdentityUserId);
-            return View(employee);
+            ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id", customer.IdentityUserId);
+            return View(customer);
         }
 
-        // POST: Employees/Edit/5
+        // POST: Customers/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("EmployeeID,Name,Zipcode,IdentityUserId")] Employee employee)
+        public async Task<IActionResult> Edit(int id, [Bind("CustID,Zipcode,Balance,Phonenumber,Startdate,Enddate,Streetaddress,Name,Streetname,Cityname,Statename,Pickupday,IdentityUserId")] Customer customer)
         {
-            if (id != employee.EmployeeID)
+            if (id != customer.CustID)
             {
                 return NotFound();
             }
@@ -102,12 +102,12 @@ namespace ProjTrashCollection.Controllers
             {
                 try
                 {
-                    _context.Update(employee);
+                    _context.Update(customer);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!EmployeeExists(employee.EmployeeID))
+                    if (!CustomerExists(customer.CustID))
                     {
                         return NotFound();
                     }
@@ -118,11 +118,11 @@ namespace ProjTrashCollection.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id", employee.IdentityUserId);
-            return View(employee);
+            ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id", customer.IdentityUserId);
+            return View(customer);
         }
 
-        // GET: Employees/Delete/5
+        // GET: Customers/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -130,31 +130,31 @@ namespace ProjTrashCollection.Controllers
                 return NotFound();
             }
 
-            var employee = await _context.Employees
-                .Include(e => e.UserIdentity)
-                .FirstOrDefaultAsync(m => m.EmployeeID == id);
-            if (employee == null)
+            var customer = await _context.Customers
+                .Include(c => c.UserIdentity)
+                .FirstOrDefaultAsync(m => m.CustID == id);
+            if (customer == null)
             {
                 return NotFound();
             }
 
-            return View(employee);
+            return View(customer);
         }
 
-        // POST: Employees/Delete/5
+        // POST: Customers/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var employee = await _context.Employees.FindAsync(id);
-            _context.Employees.Remove(employee);
+            var customer = await _context.Customers.FindAsync(id);
+            _context.Customers.Remove(customer);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool EmployeeExists(int id)
+        private bool CustomerExists(int id)
         {
-            return _context.Employees.Any(e => e.EmployeeID == id);
+            return _context.Customers.Any(e => e.CustID == id);
         }
     }
 }
