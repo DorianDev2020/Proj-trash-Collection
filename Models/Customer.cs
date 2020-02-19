@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -22,5 +24,10 @@ namespace ProjTrashCollection.Models
         public string Cityname { get; set; }
         public string Statename { get; set; }
         public string Pickupday { get; set; } //The day of the week for the pickup (Mon,Tues,Wed, etc...)
+        
+        [ForeignKey("UserIdentity")]
+        public string IdentityUserId { get; set; }
+        public IdentityUser UserIdentity { get; set; }
     }
+   
 }
