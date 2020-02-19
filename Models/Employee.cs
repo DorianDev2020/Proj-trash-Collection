@@ -9,8 +9,9 @@ namespace ProjTrashCollection.Models
     public class Employee
     {
         [Key]
-        public int Id;
-        public string name;
-        public int Zipcode;
+        public int EmployeeID { get; set; }
+
+        public string Name { get; set; }
+        public int Zipcode { get; set; }
     }
 }
