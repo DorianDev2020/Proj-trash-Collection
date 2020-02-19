@@ -4,11 +4,13 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using ProjTrashCollection.Models;
 
 namespace ProjTrashCollection.Data
 {
     public class ApplicationDbContext : IdentityDbContext
     {
+        DbSet<Employee> Employees { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
