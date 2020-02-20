@@ -17,6 +17,7 @@ namespace ProjTrashCollection.Models
         [Display(Name = "Last Name")]
         public string LastName { get; set; }
         [ForeignKey("Address")]
+        public int Zipcode { get; set; }
         public int AddressId { get; set; }
         public Address Address { get; set; }
         [ForeignKey("IdentityUser")]

@@ -12,7 +12,7 @@ namespace ProjTrashCollection.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-
+        //var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
         public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;
@@ -20,7 +20,7 @@ namespace ProjTrashCollection.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            return Redirect("./Identity/Account/Login");
         }
 
         public IActionResult Privacy()
