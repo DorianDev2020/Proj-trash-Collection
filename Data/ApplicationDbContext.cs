@@ -29,5 +29,6 @@ namespace ProjTrashCollection.Data
                 );
         }
         public DbSet<ProjTrashCollection.Models.Service> Service { get; set; }
+        public DbSet<ProjTrashCollection.Models.Address> Address { get; set; }
     }
 }
