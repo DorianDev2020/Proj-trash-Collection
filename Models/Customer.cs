@@ -19,7 +19,9 @@ namespace ProjTrashCollection.Models
         public int Startdate { get; set; } // DateTime struct
         public int Enddate { get; set; }  // DateTime struct
         public int Streetaddress { get; set; }
-        public string Name { get; set; }
+        [Display(Name = "First Name")]
+        public string FirstName { get; set; }
+        [Display(Name = "Last Name")]
         public string Streetname { get; set; }
         public string Cityname { get; set; }
         public string Statename { get; set; }
