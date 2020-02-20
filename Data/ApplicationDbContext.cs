@@ -28,5 +28,6 @@ namespace ProjTrashCollection.Data
                    }
                 );
         }
+        public DbSet<ProjTrashCollection.Models.Service> Service { get; set; }
     }
 }

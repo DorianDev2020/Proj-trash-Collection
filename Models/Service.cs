@@ -9,15 +9,11 @@ namespace ProjTrashCollection.Models
     public class Service
     {
         [Key]
-        public double Balance { get; set; }
-        [Display(Name = "Start Date")]
-        public DateTime StartDate { get; set; }
-        [Display(Name = "End Date")]
-        public DateTime EndDate { get; set; }
-        [Display(Name = "Pick Up Day")]
-        public string PickUpDay { get; set; }
-        [Display(Name = "One Time Pick Up")]
-        public DateTime OneTimePickUp { get; set; }
+        public int Id { get; set; }
+        public string PickupDay { get; set; }
         public bool IsSuspended { get; set; }
+        public DateTime Start { get; set; }
+        public DateTime End { get; set; }
+        public DateTime OneTimePickup { get; set; }
     }
 }
