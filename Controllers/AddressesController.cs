@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -22,7 +23,9 @@ namespace ProjTrashCollection.Controllers
         // GET: Addresses
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Address.ToListAsync());
+            var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var customer = _context.Customers.FirstOrDefault(a => a.UserId == userId);
+            return View(await _context.Addresses.Where(a => a.Id == customer.AddressId).ToListAsync());
         }
 
         // GET: Addresses/Details/5
@@ -33,7 +36,7 @@ namespace ProjTrashCollection.Controllers
                 return NotFound();
             }
 
-            var address = await _context.Address
+            var address = await _context.Addresses
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (address == null)
             {
@@ -54,13 +57,13 @@ namespace ProjTrashCollection.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,StreetAddress,City,State,ZipCode")] Address address)
+        public async Task<IActionResult> Create([Bind("Id,Street,City,State,Zip")] Address address)
         {
             if (ModelState.IsValid)
             {
-                _context.Address.Add(address);
+                _context.Add(address);
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Create", "Pickups");
+                return RedirectToAction(nameof(Index));
             }
             return View(address);
         }
@@ -73,7 +76,7 @@ namespace ProjTrashCollection.Controllers
                 return NotFound();
             }
 
-            var address = await _context.Address.FindAsync(id);
+            var address = await _context.Addresses.FindAsync(id);
             if (address == null)
             {
                 return NotFound();
@@ -86,7 +89,7 @@ namespace ProjTrashCollection.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,StreetAddress,City,State,ZipCode")] Address address)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Street,City,State,Zip")] Address address)
         {
             if (id != address.Id)
             {
@@ -124,7 +127,7 @@ namespace ProjTrashCollection.Controllers
                 return NotFound();
             }
 
-            var address = await _context.Address
+            var address = await _context.Addresses
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (address == null)
             {
@@ -139,15 +142,15 @@ namespace ProjTrashCollection.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var address = await _context.Address.FindAsync(id);
-            _context.Address.Remove(address);
+            var address = await _context.Addresses.FindAsync(id);
+            _context.Addresses.Remove(address);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool AddressExists(int id)
         {
-            return _context.Address.Any(e => e.Id == id);
+            return _context.Addresses.Any(e => e.Id == id);
         }
     }
 }

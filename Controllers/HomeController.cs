@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ProjTrashCollection.Models;
 
-namespace ProjTrashCollection.Controllers
+namespace TrashCollection.Controllers
 {
     public class HomeController : Controller
     {
@@ -22,12 +18,19 @@ namespace ProjTrashCollection.Controllers
         public IActionResult Index()
         {
             var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Redirect("./Identity/Account/Login");
+            }
             if (User.IsInRole("Customer"))
             {
                 return RedirectToAction("Index", "Customers");
             }
-            return Redirect("./Identity/Account/Login");
-
+            if (User.IsInRole("Employee"))
+            {
+                return RedirectToAction("Index", "Employees");
+            }
+            return RedirectToAction("Index", "Customers");
         }
 
         public IActionResult Privacy()

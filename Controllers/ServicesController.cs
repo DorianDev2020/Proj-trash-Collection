@@ -1,31 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ProjTrashCollection.Data;
 using ProjTrashCollection.Models;
 
-namespace ProjTrashCollection.Controllers
+namespace TrashCollection.Controllers
 {
-    public class PickupsController : Controller
+    public class ServiceInfoesController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public PickupsController(ApplicationDbContext context)
+        public ServiceInfoesController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: Pickups
-        public async Task<IActionResult> Index()
+        // GET: ServiceInfoes
+        public async Task<IActionResult> Index(int? id)
         {
-            return View(await _context.Service.ToListAsync());
+            var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var customer = _context.Customers.FirstOrDefault(a => a.UserId == userId);
+
+            return View(await _context.ServiceInfos.ToListAsync());
         }
 
-        // GET: Pickups/Details/5
+        // GET: ServiceInfoes/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -33,39 +35,39 @@ namespace ProjTrashCollection.Controllers
                 return NotFound();
             }
 
-            var service = await _context.Service
+            var serviceInfo = await _context.ServiceInfos
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (service == null)
+            if (serviceInfo == null)
             {
                 return NotFound();
             }
 
-            return View(service);
+            return View(serviceInfo);
         }
 
-        // GET: Pickups/Create
+        // GET: ServiceInfoes/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Pickups/Create
+        // POST: ServiceInfoes/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,PickupDay,IsSuspended,Start,End,OneTimePickup")] Service service)
+        public async Task<IActionResult> Create([Bind("Id,Balance,StartDate,EndDate,PickUpDay,OneTimePickUp,IsSuspended")] Service serviceInfo)
         {
             if (ModelState.IsValid)
             {
-                _context.Service.Add(service);
+                _context.Add(serviceInfo);
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Index", "Customers");
+                return RedirectToAction(nameof(Index));
             }
-            return View(service);
+            return View(serviceInfo);
         }
 
-        // GET: Pickups/Edit/5
+        // GET: ServiceInfoes/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -73,22 +75,22 @@ namespace ProjTrashCollection.Controllers
                 return NotFound();
             }
 
-            var service = await _context.Service.FindAsync(id);
-            if (service == null)
+            var serviceInfo = await _context.ServiceInfos.FindAsync(id);
+            if (serviceInfo == null)
             {
                 return NotFound();
             }
-            return View(service);
+            return View(serviceInfo);
         }
 
-        // POST: Pickups/Edit/5
+        // POST: ServiceInfoes/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,PickupDay,IsSuspended,SuspendedStart,SuspendedEnd,OneTimePickup")] Service service)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Balance,StartDate,EndDate,PickUpDay,OneTimePickUp,IsSuspended")] Service serviceInfo)
         {
-            if (id != service.Id)
+            if (id != serviceInfo.Id)
             {
                 return NotFound();
             }
@@ -97,12 +99,12 @@ namespace ProjTrashCollection.Controllers
             {
                 try
                 {
-                    _context.Update(service);
+                    _context.Update(serviceInfo);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PickupExists(service.Id))
+                    if (!ServiceInfoExists(serviceInfo.Id))
                     {
                         return NotFound();
                     }
@@ -113,10 +115,10 @@ namespace ProjTrashCollection.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(service);
+            return View(serviceInfo);
         }
 
-        // GET: Pickups/Delete/5
+        // GET: ServiceInfoes/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -124,30 +126,30 @@ namespace ProjTrashCollection.Controllers
                 return NotFound();
             }
 
-            var service = await _context.Service
+            var serviceInfo = await _context.ServiceInfos
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (service == null)
+            if (serviceInfo == null)
             {
                 return NotFound();
             }
 
-            return View(service);
+            return View(serviceInfo);
         }
 
-        // POST: Pickups/Delete/5
+        // POST: ServiceInfoes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var service = await _context.Service.FindAsync(id);
-            _context.Service.Remove(service);
+            var serviceInfo = await _context.ServiceInfos.FindAsync(id);
+            _context.ServiceInfos.Remove(serviceInfo);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool PickupExists(int id)
+        private bool ServiceInfoExists(int id)
         {
-            return _context.Service.Any(e => e.Id == id);
+            return _context.ServiceInfos.Any(e => e.Id == id);
         }
     }
 }

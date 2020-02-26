@@ -14,10 +14,7 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.PickupDay)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsSuspended)
+                @Html.DisplayNameFor(model => model.Balance)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Start)
@@ -26,35 +23,45 @@
                 @Html.DisplayNameFor(model => model.End)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.OneTimePickup)
+                @Html.DisplayNameFor(model => model.PickUpDay)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.OneTimePickUp)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Suspended)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.PickupDay)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsSuspended)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Start)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.End)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.OneTimePickup)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Balance)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Start)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.End)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PickUpDay)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.OneTimePickUp)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Suspended)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

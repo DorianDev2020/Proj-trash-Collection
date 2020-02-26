@@ -10,10 +10,15 @@ namespace ProjTrashCollection.Models
     {
         [Key]
         public int Id { get; set; }
-        public string PickupDay { get; set; }
-        public bool IsSuspended { get; set; }
+        public double Balance { get; set; }
+        
         public DateTime Start { get; set; }
+        
         public DateTime End { get; set; }
-        public DateTime OneTimePickup { get; set; }
+        
+        public string PickUpDay { get; set; }
+        public DateTime OneTimePickUp { get; set; }
+        public bool Suspended { get; set; }
+        public bool PickedUp { get; set; }
     }
 }

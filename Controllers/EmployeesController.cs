@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -8,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using ProjTrashCollection.Data;
 using ProjTrashCollection.Models;
 
-namespace ProjTrashCollection.Controllers
+namespace TrashCollection.Controllers
 {
     public class EmployeesController : Controller
     {
@@ -20,10 +19,17 @@ namespace ProjTrashCollection.Controllers
         }
 
         // GET: Employees
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var applicationDbContext = _context.Employees.Include(e => e.IdentityUser);
-            return View(await applicationDbContext.ToListAsync());
+            var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var employee = _context.Employees.Include(e => e.Address).Where(e => e.IdentityUserId == userId).FirstOrDefault();
+            if (employee == null)
+            {
+                return RedirectToAction("Create", "Employees");
+            }
+
+            var users = _context.Customers.Include(c => c.Address).Where(c => c.Address.Zip == employee.Address.Zip).ToList();
+            return View(users);
         }
 
         // GET: Employees/Details/5
@@ -35,8 +41,9 @@ namespace ProjTrashCollection.Controllers
             }
 
             var employee = await _context.Employees
+                .Include(e => e.Address)
                 .Include(e => e.IdentityUser)
-                .FirstOrDefaultAsync(m => m.EmployeeID == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (employee == null)
             {
                 return NotFound();
@@ -45,9 +52,20 @@ namespace ProjTrashCollection.Controllers
             return View(employee);
         }
 
+        // GET: Customers/Details/5
+        public IActionResult Confirm(int? id)
+        {
+            var customer = _context.Customers.FirstOrDefault(c => c.Id == id);
+            var service = _context.ServiceInfos.FirstOrDefault(s => s.Id == customer.ServiceInfoId);
+            service.Balance += 25;
+            service.PickedUp = true;
+            _context.SaveChanges();
+            return RedirectToAction("Index", "Employees");
+        }
         // GET: Employees/Create
         public IActionResult Create()
         {
+            ViewData["AddressId"] = new SelectList(_context.Addresses, "Id", "Id");
             ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id");
             return View();
         }
@@ -57,7 +75,7 @@ namespace ProjTrashCollection.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("EmployeeID,Name,Zipcode,IdentityUserId")] Employee employee)
+        public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,AddressId,IdentityUserId")] Employee employee)
         {
             if (ModelState.IsValid)
             {
@@ -65,6 +83,7 @@ namespace ProjTrashCollection.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["AddressId"] = new SelectList(_context.Addresses, "Id", "Id", employee.AddressId);
             ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id", employee.IdentityUserId);
             return View(employee);
         }
@@ -82,6 +101,7 @@ namespace ProjTrashCollection.Controllers
             {
                 return NotFound();
             }
+            ViewData["AddressId"] = new SelectList(_context.Addresses, "Id", "Id", employee.AddressId);
             ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id", employee.IdentityUserId);
             return View(employee);
         }
@@ -91,9 +111,9 @@ namespace ProjTrashCollection.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("EmployeeID,Name,Zipcode,IdentityUserId")] Employee employee)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,AddressId,IdentityUserId")] Employee employee)
         {
-            if (id != employee.EmployeeID)
+            if (id != employee.Id)
             {
                 return NotFound();
             }
@@ -107,7 +127,7 @@ namespace ProjTrashCollection.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!EmployeeExists(employee.EmployeeID))
+                    if (!EmployeeExists(employee.Id))
                     {
                         return NotFound();
                     }
@@ -118,6 +138,7 @@ namespace ProjTrashCollection.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["AddressId"] = new SelectList(_context.Addresses, "Id", "Id", employee.AddressId);
             ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id", employee.IdentityUserId);
             return View(employee);
         }
@@ -131,8 +152,9 @@ namespace ProjTrashCollection.Controllers
             }
 
             var employee = await _context.Employees
+                .Include(e => e.Address)
                 .Include(e => e.IdentityUser)
-                .FirstOrDefaultAsync(m => m.EmployeeID == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (employee == null)
             {
                 return NotFound();
@@ -154,7 +176,7 @@ namespace ProjTrashCollection.Controllers
 
         private bool EmployeeExists(int id)
         {
-            return _context.Employees.Any(e => e.EmployeeID == id);
+            return _context.Employees.Any(e => e.Id == id);
         }
     }
 }

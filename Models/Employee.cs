@@ -11,13 +11,12 @@ namespace ProjTrashCollection.Models
     public class Employee
     {
         [Key]
-        public int EmployeeID { get; set; }
+        public int Id { get; set; }
         [Display(Name = "First Name")]
         public string FirstName { get; set; }
         [Display(Name = "Last Name")]
         public string LastName { get; set; }
         [ForeignKey("Address")]
-        public int Zipcode { get; set; }
         public int AddressId { get; set; }
         public Address Address { get; set; }
         [ForeignKey("IdentityUser")]

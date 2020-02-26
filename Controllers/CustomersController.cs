@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ProjTrashCollection.Data;
@@ -21,26 +21,34 @@ namespace ProjTrashCollection.Controllers
         }
 
         // GET: Customers
-        public async Task<IActionResult> Index()
+        public ActionResult Index()
         {
-            var applicationDbContext = _context.Customers.Include(c => c.UserIdentity);
-            return View(await applicationDbContext.ToListAsync());
+            var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var customer = _context.Customers.FirstOrDefault(a => a.UserId == userId);
+            if (customer is null)
+            {
+                return RedirectToAction("Create");
+            }
+            return RedirectToAction("Details");
         }
 
         // GET: Customers/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public IActionResult Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var customer = await _context.Customers
-                .Include(c => c.UserIdentity)
-                .FirstOrDefaultAsync(m => m.CustID == id);
+            var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var customer = _context.Customers.FirstOrDefault(a => a.UserId == userId);
             if (customer == null)
             {
-                return NotFound();
+                customer = _context.Customers.FirstOrDefault(c => c.Id == id);
+            }
+            if (userId == null)
+            {
+                return RedirectToAction("./Identity/Account/Login");
+            }
+
+            if (customer == null)
+            {
+                return RedirectToAction("Create", "Customer");
             }
 
             return View(customer);
@@ -58,33 +66,34 @@ namespace ProjTrashCollection.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CustID,Zipcode,Balance,Phonenumber,Startdate,Enddate,Streetaddress,FirstName,LastName,Streetname,Cityname,Statename,Pickupday,IdentityUserId")] Customer customer)
+        public IActionResult Create([Bind("FirstName,LastName,Address,ServiceInfo")] Customer customer)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(customer);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                customer.UserId = userId;
+
+                _context.Customers.Add(customer);
+                _context.SaveChanges();
+                return RedirectToAction("Create", "Addresses");
             }
-            ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id", customer.IdentityUserId);
+            ViewData["AddressId"] = new SelectList(_context.Set<Address>(), "Id", "Id", customer.AddressId);
+            ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id", customer.UserId);
+            ViewData["ServiceInfoId"] = new SelectList(_context.ServiceInfos, "Id", "Id", customer.ServiceInfoId);
+
             return View(customer);
         }
 
         // GET: Customers/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var customer = await _context.Customers.FindAsync(id);
-            if (customer == null)
-            {
-                return NotFound();
-            }
-            ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id", customer.IdentityUserId);
+            var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var customer = _context.Customers.FirstOrDefault(a => a.UserId == userId);
+            //ViewData["AddressId"] = new SelectList(_context.Addresses, "Id", "Id", customer.AddressId);
+            //ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id", customer.UserId);
+            //ViewData["ServiceInfoId"] = new SelectList(_context.ServiceInfos, "Id", "Id", customer.ServiceInfoId);
             return View(customer);
+
         }
 
         // POST: Customers/Edit/5
@@ -92,23 +101,30 @@ namespace ProjTrashCollection.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CustID,Zipcode,Balance,Phonenumber,Startdate,Enddate,Streetaddress,FirstName,LastName,Streetname,Cityname,Statename,Pickupday,IdentityUserId")] Customer customer)
+        public IActionResult Edit(int id, [Bind("FirstName,LastName,AddressId,ServiceInfoId")] Customer customer)
         {
-            if (id != customer.CustID)
+            var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var customer1 = _context.Customers.FirstOrDefault(a => a.UserId == userId);
+            if (id != customer1.Id)
             {
                 return NotFound();
             }
+            Customer EditCustomer = _context.Customers.Find(id);
+            EditCustomer.FirstName = customer.FirstName;
+            EditCustomer.LastName = customer.LastName;
+            EditCustomer.AddressId = customer.AddressId;
+            EditCustomer.ServiceInfoId = customer.ServiceInfoId;
 
             if (ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(customer);
-                    await _context.SaveChangesAsync();
+                    _context.SaveChanges();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CustomerExists(customer.CustID))
+                    if (!CustomerExists(customer.Id))
                     {
                         return NotFound();
                     }
@@ -119,7 +135,9 @@ namespace ProjTrashCollection.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id", customer.IdentityUserId);
+            ViewData["AddressId"] = new SelectList(_context.Addresses, "Id", "Id", customer.AddressId);
+            ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id", customer.UserId);
+            ViewData["ServiceInfoId"] = new SelectList(_context.ServiceInfos, "Id", "Id", customer.ServiceInfoId);
             return View(customer);
         }
 
@@ -132,8 +150,10 @@ namespace ProjTrashCollection.Controllers
             }
 
             var customer = await _context.Customers
-                .Include(c => c.UserIdentity)
-                .FirstOrDefaultAsync(m => m.CustID == id);
+                .Include(c => c.Address)
+                .Include(c => c.IdentityUser)
+                .Include(c => c.ServiceInfo)
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (customer == null)
             {
                 return NotFound();
@@ -155,7 +175,7 @@ namespace ProjTrashCollection.Controllers
 
         private bool CustomerExists(int id)
         {
-            return _context.Customers.Any(e => e.CustID == id);
+            return _context.Customers.Any(e => e.Id == id);
         }
     }
 }
